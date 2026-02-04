@@ -1,4 +1,4 @@
-# GEN-AI_RAG
+# GEN_AI_RAG
 生成AI＋RAG＋AIエージェントのテスト実装のリポジトリです。
 
 ## 目標
