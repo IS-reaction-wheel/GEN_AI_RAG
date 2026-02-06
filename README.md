@@ -44,7 +44,7 @@
     > transformers-Hugging Face-LangChain間の接続は、大規模言語モデル入門Ⅱに記載がある。（ただし、本リポジトリでの実装のやり方は少し変えています。）
 6. [John Berryman, Albert Ziegler 著, 服部佑樹, 佐藤直生 訳, LLMのプロンプトエンジニアリング ―GitHub Copilotを生んだ開発者が教える生成AIアプリケーション開発, オライリー・ジャパン, 2025](https://www.oreilly.co.jp/books/9784814401130/)
     > LLMの基礎原理の解説（3, 4より難しいが、LLMの仕組みの本質的なイメージが説明されている。）
-7. [MaL¥AI/LLMアプリケーションの構築, オライリー・ジャパン, 2025](https://www.oreilly.co.jp/books/9784814401307/)
+7. [Mayo Oshin, Nuno Campos 著, 新井翔太, 嶋田健志 訳, 初めてのLangChain ―LangChainとLangGraphによるAI/LLMアプリケーションの構築, オライリー・ジャパン, 2025](https://www.oreilly.co.jp/books/9784814401307/)
     > 2026/02時点で、LangGraphによるメモリ管理の記述がある和書
 8. [西見公宏，吉田真吾，大嶋勇樹, LangChainとLangGraphによるRAG・AIエージェント［実践］入門, 技術評論社, 2024](https://gihyo.jp/book/2024/978-4-297-14530-9)
     > LangChain/LangGraphについて、2026/02時点で最も詳細な解説。ただし出版日が古く、メモリ管理の記述が古い。
