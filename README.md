@@ -12,6 +12,7 @@
 - 計算環境：Google Colab（VS Code 拡張機能経由で使用）
 - AI開発フレームワーク：LangGraph / LangChain
 - LLM/Embeddingモデル：OSSモデル。Hugging Faceに接続・量子化して構築
+- LLMバックエンド：transformers + bitsandbytes（本番環境移行時は、Ollamaなど、サーバ管理されたものを使用する必要が生じる可能性あり。 `notebook/02_chat_langgraph_langchain.ipynb` 参照）
 - ベクトルデータベース：Chroma DB（インメモリ使用）
 
 #### フォルダ・ファイル構成
@@ -36,6 +37,12 @@
     > transformersでのLLMモデル呼び出しにおける量子化の解説
 3. [山田育矢, 鈴木正敏，山田康輔，李凌寒, 大規模言語モデル入門, 技術評論社, 2023](https://gihyo.jp/book/2023/978-4-297-13633-8)
 4. [山田育矢, 鈴木正敏，西川荘介，藤井一喜，山田康輔，李凌寒, 大規模言語モデル入門Ⅱ 〜生成型LLMの実装と評価, 技術評論社, 2024](https://gihyo.jp/book/2024/978-4-297-14393-0)
-    > LLMの基礎原理やtransformersでの実装方法の解説。（ただし、実装における計算条件の設定などは、各ページに分散されている。）
+    > LLMの基礎原理やtransformersでの実装方法の解説（ただし、実装における計算条件の設定などは、各ページに分散されている。）
+
+    > transformers-Hugging Face-LangChain間の接続は、文献4に記載がある。（ただし、本リポジトリでの実装のやり方は少し変えています。）
 5. [John Berryman, Albert Ziegler 著, 服部佑樹, 佐藤直生 訳, LLMのプロンプトエンジニアリング ―GitHub Copilotを生んだ開発者が教える生成AIアプリケーション開発, オライリー・ジャパン, 2025](https://www.oreilly.co.jp/books/9784814401130/)
     > LLMの基礎原理の解説（3, 4より難しいが、LLMの仕組みの本質的なイメージが説明されている。）
+6. [MaL¥AI/LLMアプリケーションの構築, オライリー・ジャパン, 2025](https://www.oreilly.co.jp/books/9784814401307/)
+    > 2026/02時点で、LangGraphによるメモリ管理の記述がある和書
+7. [西見公宏，吉田真吾，大嶋勇樹, LangChainとLangGraphによるRAG・AIエージェント［実践］入門, 技術評論社, 2024](https://gihyo.jp/book/2024/978-4-297-14530-9)
+    > LangChain/LangGraphについて、2026/02時点で最も詳細な解説。ただし出版日が古く、メモリ管理の記述が古い。
