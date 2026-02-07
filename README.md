@@ -12,7 +12,7 @@
 - 計算環境：Google Colab（VS Code 拡張機能経由で使用）
 - AI開発フレームワーク：LangGraph / LangChain
 - LLM/Embeddingモデル：OSSモデル。Hugging Faceに接続・量子化して構築
-- LLMバックエンド：transformers + bitsandbytes（本番環境移行時は、Ollamaなど、サーバ管理されたものを使用する必要が生じる可能性あり。 `notebook/02_chat_langgraph_langchain.ipynb` 参照）
+- LLMバックエンド：Ollama（ツールコールのネイティブサポート、モデル切り替えの容易さから採用。初期の transformers ベースの実装は `notebook_transformers/` に保管）
 - ベクトルデータベース：Chroma DB（インメモリ使用）
 
 #### フォルダ・ファイル構成
@@ -20,7 +20,8 @@
 |:---|:---|:---|
 |app/|Gradio UIのスクリプト|-|
 |data/|RAGで読み込みするテストデータ（PDF）|githubには未アップロード|
-|notebook/|各実装要素の確認用|-|
+|notebook/|各実装要素の確認用（Ollama ベース）|-|
+|notebook_transformers/|初期の transformers ベース実装（アーカイブ）|[経緯](notebook_transformers/README.md)|
 |outputs/|ファイル出力|-|
 |src/|主要な実装コード|-|
 |scripts/|前処理や読み込みモデルなどのチューニングが必要なコード|-|
