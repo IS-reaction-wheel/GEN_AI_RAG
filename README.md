@@ -31,6 +31,11 @@
 |README.md|本リポジトリの概要|この画面のdoc|
 
 
+#### LLM モデルに関するリンク
+1. [Ollama のモデルライブラリ](https://ollama.com/library)
+2. [Hugging Face](https://huggingface.co/)
+3. [JMTEB Leaderboard（Embedding モデルの日本語性能のランキングリスト）](https://github.com/sbintuitions/JMTEB/blob/main/leaderboard.md)
+
 #### 参考文献
 1. [浅野純季，木村真也，田中冬馬，武藤克大，栁泉穂, 先輩データサイエンティストからの指南書 -実務で生き抜くためのエンジニアリングスキル, 技術評論社, 2025](https://gihyo.jp/book/2025/978-4-297-15100-3)
    > 環境構築全般（Pythonのパッケージマネージャ～プロジェクトのフォルダ構成など）
@@ -49,3 +54,7 @@
     > MCPサーバの仕組みから実装方法までの解説
 9. [御田稔, 大坪悠, 塚田真規, AIエージェント開発 / 運用入門 [生成AI深掘りガイド], SBクリエイティブ, 2025](https://www.sbcr.jp/product/4815636609/)
     > LangGraphと、LangGraph/MCPサーバの連携の実装方法などの解説
+10. [太田真人, 宮脇峻平, 西見公宏, 後藤勇輝, 阿田木勇八, A現場で活用するためのAIエージェント実践入門, 講談社サイエンティフィク, 2025](https://www.kspub.co.jp/book/detail/5401408.html)
+    > AIエージェントの設計について、2026/02時点で最も実践的な解説
+
+    > AIエージェントワークフローで参考にした設計(https://github.com/masamasa59/genai-agent-advanced-book/tree/main/chapter4)
