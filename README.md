@@ -54,7 +54,7 @@
     > MCPサーバの仕組みから実装方法までの解説
 9. [御田稔, 大坪悠, 塚田真規, AIエージェント開発 / 運用入門 [生成AI深掘りガイド], SBクリエイティブ, 2025](https://www.sbcr.jp/product/4815636609/)
     > LangGraphと、LangGraph/MCPサーバの連携の実装方法などの解説
-10. [太田真人, 宮脇峻平, 西見公宏, 後藤勇輝, 阿田木勇八, A現場で活用するためのAIエージェント実践入門, 講談社サイエンティフィク, 2025](https://www.kspub.co.jp/book/detail/5401408.html)
+10. [太田真人, 宮脇峻平, 西見公宏, 後藤勇輝, 阿田木勇八, 現場で活用するためのAIエージェント実践入門, 講談社サイエンティフィク, 2025](https://www.kspub.co.jp/book/detail/5401408.html)
     > AIエージェントの設計について、2026/02時点で最も実践的な解説
 
     > AIエージェントワークフローで参考にした設計(https://github.com/masamasa59/genai-agent-advanced-book/tree/main/chapter4)
