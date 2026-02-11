@@ -11,8 +11,11 @@
 - 開発環境：Windows / Python / VS Code / Claude Code
 - 計算環境：Google Colab（VS Code 拡張機能経由で使用）
 - AI開発フレームワーク：LangGraph / LangChain
-- LLM/Embeddingモデル：OSSモデル。Hugging Faceに接続・量子化して構築
-- LLMバックエンド：Ollama（非同期処理、実装の容易さ、ツールコールのネイティブサポートから採用。初期の transformers ベースの実装は `notebook_transformers/` に保管）
+- LLM モデル：gpt-oss:20b（OSSモデル, 商用利用可能）。Ollama ライブラリからダウンロードして構築
+- Embedding モデル：cl-nagoya/ruri-v3-310m（OSSモデル, 商用利用可能）。Hugging Faceからダウンロードして構築
+- Reranker モデル：cl-nagoya/ruri-v3-reranker-310m（OSSモデル, 商用利用可能）。Hugging Faceからダウンロードして構築
+- LLM バックエンド：Ollama（非同期処理、実装の容易さ、ツールコールのネイティブサポートから採用。初期の transformers ベースの実装は `notebook_transformers/` に保管）
+- Embedding / Reranker バックエンド：Sentence Transformers（日本語性能を重視した OSS モデルを選定した結果、このバックエンドとなった）
 - ベクトルデータベース：Chroma DB（インメモリ使用）
 
 #### フォルダ・ファイル構成
@@ -35,6 +38,7 @@
 1. [Ollama のモデルライブラリ](https://ollama.com/library)
 2. [Hugging Face](https://huggingface.co/)
 3. [JMTEB Leaderboard（Embedding モデルの日本語性能のランキングリスト）](https://github.com/sbintuitions/JMTEB/blob/main/leaderboard.md)
+4. [ruri-v3-reranker のモデルカード内に記載されるランキング（Reranker モデルの日本語性能のランキングリスト）](https://huggingface.co/cl-nagoya/ruri-v3-reranker-310m)
 
 #### 参考文献
 1. [浅野純季，木村真也，田中冬馬，武藤克大，栁泉穂, 先輩データサイエンティストからの指南書 -実務で生き抜くためのエンジニアリングスキル, 技術評論社, 2025](https://gihyo.jp/book/2025/978-4-297-15100-3)
