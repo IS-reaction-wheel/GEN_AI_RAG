@@ -3,7 +3,7 @@
 
 ![notebook_07](notebook/images/notebook_07.png)
 
-[Agentic RAG でのチャットの例](notebook/outputs/07_chat_log.md)
+[<u>**Agentic RAG でのマルチターンチャットの例**</u>](notebook/outputs/07_chat_log.md)
 
 #### 目標
 - OSSのモデル ＋（インメモリ）ベクトルデータベース ＋ 自己修正機能（AIエージェント）＋ GradioのUIまでの構築。
