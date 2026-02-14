@@ -3,7 +3,8 @@
 
 ![notebook_07](notebook/images/notebook_07.png)
 
-[<u>**Agentic RAG でのマルチターンチャットの例**</u>](notebook/outputs/07_chat_log.md)
+- [<u>**Agentic RAG でのマルチターンチャットの例**</u>](notebook/outputs/07_chat_log.md)
+- [<u>**上のチャットでの AI の思考過程の例**</u>](notebook/outputs/07_reasoning_log.md)
 
 #### 目標
 - OSSのモデル ＋（インメモリ）ベクトルデータベース ＋ 自己修正機能（AIエージェント）＋ GradioのUIまでの構築。
@@ -49,6 +50,7 @@
 2. [Hugging Face](https://huggingface.co/)
 3. [JMTEB Leaderboard（Embedding モデルの日本語性能のランキングリスト）](https://github.com/sbintuitions/JMTEB/blob/main/leaderboard.md)
 4. [ruri-v3-reranker のモデルカード内に記載されるランキング（Reranker モデルの日本語性能のランキングリスト）](https://huggingface.co/cl-nagoya/ruri-v3-reranker-310m)
+5. [Ollama での LLM の Thinking の仕様](https://docs.ollama.com/capabilities/thinking)
 
 #### 参考文献
 1. [浅野純季，木村真也，田中冬馬，武藤克大，栁泉穂, 先輩データサイエンティストからの指南書 -実務で生き抜くためのエンジニアリングスキル, 技術評論社, 2025](https://gihyo.jp/book/2025/978-4-297-15100-3)
