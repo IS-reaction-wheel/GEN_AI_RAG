@@ -1,7 +1,8 @@
 # GEN_AI_RAG
 **Agentic RAG ： 生成AI＋RAG＋AIエージェントのテスト実装のリポジトリです。**
 
-![notebook_07](notebook/images/notebook_07.png)
+![notebook_07](notebook/images/demo_github.gif)
+*※ファイルサイズ削減のため、待ち時間をトリミングしています*
 
 - [<u>**Agentic RAG でのマルチターンチャットの例**</u>](notebook/outputs/07_chat_log.md)
 - [<u>**上のチャットでの AI の思考過程の例**</u>](notebook/outputs/07_reasoning_log.md)
