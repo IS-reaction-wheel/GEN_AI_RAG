@@ -30,11 +30,9 @@ uv run <cmd>        # プロジェクト環境内で実行
 
 - `.env`・`data/` は gitignore 済み。コミットしない。
 - 計算リソース（GPU）は Google Colab を使用する前提。本PCにGPUはない。Colab へのアクセスは VS Code の Colab カーネル拡張経由。
-- pytest はまだ依存関係に含まれていない。初回テスト作成時に `uv add --dev pytest` で追加する。
 
 ## テスト実行
 
 ```bash
-uv add --dev pytest   # 初回のみ
 uv run pytest tests/
 ```
