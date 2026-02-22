@@ -297,11 +297,11 @@ class DIContainer:
 
 **使い分けの方針:**
 
-| 用途 | 採用するクラス | 理由 |
-|---|---|---|
-| LLM 構造化出力（`with_structured_output` 用） | Pydantic `BaseModel` | LangChain との直接連携、バリデーション |
-| ドメインモデル（データ保持） | Pydantic `BaseModel` | バリデーション、シリアライズの統一性 |
-| LangGraph ワークフロー状態 | `TypedDict` | LangGraph の State 定義の標準パターン |
+| 用途 | 採用するクラス | `frozen` | 理由 |
+|---|---|---|---|
+| LLM 構造化出力（`with_structured_output` 用） | Pydantic `BaseModel` | **なし** | `@model_validator` でフィールドを書き換えるため `frozen=True` は付与しない |
+| ドメインモデル（データ保持） | Pydantic `BaseModel` | `frozen=True` | イミュータブルなデータオブジェクトとして扱う |
+| LangGraph ワークフロー状態 | `TypedDict` | — | LangGraph の State 定義の標準パターン |
 
 ### 5.2 ドメインモデル定義
 
