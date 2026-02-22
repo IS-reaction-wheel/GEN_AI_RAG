@@ -4,4 +4,6 @@
 .venv/
 .vscode/
 data/
-ref_CLAUDE.md # CLAUDE.md 作成の参考ファイル
+
+# CLAUDE.md 作成の参考ファイル
+ref_CLAUDE.md
