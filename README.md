@@ -84,3 +84,7 @@
     > Gradio に関する解説がある。
 14. [蒲生弘郷, LLMの原理、RAG・エージェント開発から読み解く コンテキストエンジニアリング, 技術評論社, 2026](https://gihyo.jp/book/2026/978-4-297-15419-6)
     > **Agentic RAG（生成AI＋RAG＋AIエージェント）の構築において、特に参照するべき資料。**
+15. [西見公宏，吉田真吾，大嶋勇樹, 実践Claude Code入門 ―現場で活用するためのAIコーディングの思考法, 技術評論社, 2025](https://gihyo.jp/book/2026/978-4-297-15354-0)
+    > **仕様駆動開発で参照した資料。本プロジェクトの CLAUDE.md は、この文献の chapter 4 のコードをそのまま使用している。**
+
+    > chapter 4 の CLAUDE.md コード(https://github.com/GenerativeAgents/claude-code-book-chapter4)

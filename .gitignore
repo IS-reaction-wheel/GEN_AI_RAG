@@ -1,9 +1,7 @@
 .env
 .claude/
 .mcp.json
+.steering
 .venv/
 .vscode/
 data/
-
-# CLAUDE.md 作成の参考ファイル
-ref_CLAUDE.md
