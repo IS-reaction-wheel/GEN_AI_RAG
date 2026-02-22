@@ -123,6 +123,7 @@ Gradio を用いた UI 上でユーザーが触れる用語を定義する。
 | ドキュメントチャンク | `DocumentChunk` | `src/domain/models.py` — ベクトル DB に格納するチャンク |
 | 検索結果 | `SearchResult` | `src/domain/models.py` — 検索結果（チャンク + スコア） |
 | メッセージ役割 | `MessageRole` | `src/domain/models.py` — `Enum`（`USER` / `ASSISTANT` / `SYSTEM`） |
+| LLM 応答 | `ChatResponse` | `src/domain/ports/llm_port.py` — LLM の応答（Pydantic `BaseModel`、`content` + `thinking`） |
 | ワークフロー設定 | `WorkflowConfig` | `src/domain/config.py` — ハイパーパラメータ一元管理（Pydantic `BaseSettings`） |
 
 ### 4.4 Port（インターフェース）/ Adapter（具体実装）

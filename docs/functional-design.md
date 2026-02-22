@@ -481,7 +481,7 @@ erDiagram
 | Reranker（Port） | Domain | `typing.Protocol` で定義 |
 | Reranker（Adapter） | Interface Adapters | Sentence Transformers（`sentence-transformers` ライブラリ） |
 | データローダー（Port） | Domain | `typing.Protocol` で定義 |
-| データローダー（Adapter） | Interface Adapters | PDF: PyMuPDF 等のライブラリ |
+| データローダー（Adapter） | Interface Adapters | PDF: markitdown（Markdown 変換）+ spaCy（チャンク分割） |
 | Agentic RAG ワークフロー | Use Cases | LangGraph |
 | UI ハンドラ | Interface Adapters | Gradio |
 | DI コンテナ | Infrastructure | 手動 DI（`di_container.py`） |
@@ -495,8 +495,9 @@ classDiagram
     %% Domain 層 - Port（インターフェース）
     class LLMPort {
         <<Protocol>>
-        +generate(prompt: str, chat_history: list) ChatResponse
-        +generate_with_tools(prompt: str, tools: list) ChatResponse
+        +agenerate(messages: list, num_predict, reasoning) ChatResponse
+        +agenerate_structured(messages: list, response_model, num_predict, reasoning) T
+        +astream(messages: list, reasoning) AsyncIterator~str~
     }
 
     class VectorStorePort {
@@ -534,9 +535,10 @@ classDiagram
     %% Interface Adapters 層 - Adapter（具体実装）
     class OllamaAdapter {
         -model_name: str
-        -client: OllamaClient
-        +generate(prompt: str, chat_history: list) ChatResponse
-        +generate_with_tools(prompt: str, tools: list) ChatResponse
+        -client: ChatOllama
+        +agenerate(messages: list, num_predict, reasoning) ChatResponse
+        +agenerate_structured(messages: list, response_model, num_predict, reasoning) T
+        +astream(messages: list, reasoning) AsyncIterator~str~
     }
 
     class ChromaDBAdapter {
@@ -731,7 +733,7 @@ sequenceDiagram
 
     Note over Handler: Phase 1: タスク分割
     Handler->>TaskPlan: run_task_planning(question)
-    TaskPlan->>LLM: with_structured_output(TaskPlanningResult)
+    TaskPlan->>LLM: agenerate_structured(messages, TaskPlanningResult)
     LLM-->>TaskPlan: TaskPlanningResult（サブタスク群）
 
     loop 自己修正ループ（最大 MAX_LOOP_COUNT 回）
@@ -746,12 +748,12 @@ sequenceDiagram
 
         Note over Handler: Phase 2: 要約
         Handler->>Summarize: run_summarize(question, results)
-        Summarize->>LLM: generate(要約プロンプト)
+        Summarize->>LLM: agenerate(messages, reasoning='low')
         LLM-->>Summarize: 要約テキスト
 
         Note over Handler: Phase 2: 判定
         Handler->>Judge: run_judge(question, summary)
-        Judge->>LLM: with_structured_output(JudgeResult)
+        Judge->>LLM: agenerate_structured(messages, JudgeResult)
         LLM-->>Judge: JudgeResult
 
         alt 情報が十分 or ループ上限到達
@@ -763,7 +765,7 @@ sequenceDiagram
     end
 
     Note over Handler: Phase 3: 回答生成（ストリーミング）
-    Handler->>GenAnswer: LLM.astream(回答プロンプト + 検索結果)
+    Handler->>GenAnswer: llm.astream(messages, reasoning='medium')
     loop ストリーミング
         GenAnswer-->>UI: トークン単位で逐次表示
     end
@@ -890,31 +892,70 @@ Gradio UI は左右2カラムの単一画面で構成する（notebook 07 で動
 
 ### 10.1 LLMPort
 
+notebook 07 では LLM を3つのパターン（テキスト生成・構造化出力・ストリーミング生成）で使用しており、ノードごとに `num_predict` / `reasoning` を変えて呼び出している。`LLMPort` はこの3パターンを抽象化し、LangChain 固有のメソッド（`with_structured_output` 等）が Use Cases 層に漏れ出ないようにする。
+
 ```python
 # src/domain/ports/llm_port.py
 
-from typing import Protocol
-from domain.models import ChatMessage
+from typing import AsyncIterator, Protocol, TypeVar
+from pydantic import BaseModel, Field
+
+T = TypeVar("T", bound=BaseModel)
 
 
-class ChatResponse:
-    content: str
-    thinking: str  # Thinking ログ
+class ChatResponse(BaseModel):
+    """LLM の応答"""
+    model_config = {"frozen": True}
+
+    content: str = Field(description="LLM の応答テキスト")
+    thinking: str = Field(default="", description="Thinking ログ（推論過程）")
 
 
 class LLMPort(Protocol):
-    def generate(
-        self, prompt: str, chat_history: list[ChatMessage]
+    """LLM クライアントのインターフェース"""
+
+    async def agenerate(
+        self,
+        messages: list[dict],
+        *,
+        num_predict: int | None = None,
+        reasoning: str | None = None,
     ) -> ChatResponse:
-        """プロンプトと会話履歴から回答を生成する"""
+        """テキスト生成（summarize 等で使用）"""
         ...
 
-    def generate_with_tools(
-        self, prompt: str, tools: list[dict]
-    ) -> ChatResponse:
-        """ツールコール付きで回答を生成する"""
+    async def agenerate_structured(
+        self,
+        messages: list[dict],
+        response_model: type[T],
+        *,
+        num_predict: int | None = None,
+        reasoning: str | None = None,
+    ) -> T:
+        """構造化出力（task_planning, judge で使用）
+
+        Adapter 内部で LangChain の with_structured_output() を使用し、
+        Pydantic モデルに準拠した型安全な出力を返す。
+        """
+        ...
+
+    async def astream(
+        self,
+        messages: list[dict],
+        *,
+        reasoning: str | None = None,
+    ) -> AsyncIterator[str]:
+        """ストリーミング生成（generate_answer で使用）
+
+        トークン単位で逐次的にテキストを yield する。
+        """
         ...
 ```
+
+**設計判断:**
+- `generate_with_tools()` は削除した。notebook 07 では検索ツールを `search_tool.invoke()` で直接呼び出しており、LLM のツールコール機能は使用していないため（YAGNI 原則）。
+- `messages` の型は `list[dict]` とし、LangChain の `SystemMessage` / `HumanMessage` への変換は Adapter 内部で行う。これにより Domain 層が LangChain に依存しない。
+- ノードごとの `num_predict` / `reasoning` はキーワード引数で渡し、Adapter 内部で LLM インスタンスのパラメータを上書きする（notebook 07 の `_make_llm()` パターンに対応）。
 
 ### 10.2 VectorStorePort
 
@@ -1043,19 +1084,23 @@ def should_continue(state: WorkflowState) -> str:
 
 ### 11.4 Pydantic `with_structured_output` による構造化出力（FR-01）
 
-LLM の出力を Pydantic モデルで型安全にパースし、バリデーションエラーを自動ハンドリングする。
+LLM の出力を Pydantic モデルで型安全にパースし、バリデーションエラーを自動ハンドリングする。Use Cases 層は `LLMPort.agenerate_structured()` を呼び出すのみで、`with_structured_output` の詳細は `OllamaAdapter` 内部に隠蔽される。
 
 ```python
 # task_planning ノードでの使用例（概念コード）
-
-structured_llm = llm.with_structured_output(TaskPlanningResult)
+# llm は LLMPort（Protocol）にのみ依存し、Adapter の具体実装を知らない
 
 try:
     result = await asyncio.wait_for(
-        structured_llm.ainvoke([
-            SystemMessage(content=SYSTEM_PROMPT_TASK_PLANNING),
-            HumanMessage(content=question),
-        ]),
+        llm.agenerate_structured(
+            messages=[
+                {"role": "system", "content": config.system_prompt_task_planning},
+                {"role": "user", "content": question},
+            ],
+            response_model=TaskPlanningResult,
+            num_predict=config.structured_output_num_predict,
+            reasoning=config.reasoning_task_planning,
+        ),
         timeout=config.structured_output_timeout,  # WorkflowConfig から取得
     )
     subtasks = [st.model_dump() for st in result.subtasks]
@@ -1065,6 +1110,22 @@ except asyncio.TimeoutError:
 except Exception:
     # Pydantic バリデーション失敗等 → フォールバック
     subtasks = [{"purpose": "基本調査", "queries": [question]}]
+```
+
+**OllamaAdapter 側での実装（概念コード）:**
+
+```python
+# src/interfaces/adapters/ollama_adapter.py（概念コード）
+
+class OllamaAdapter:
+    """LLMPort の具体実装（Ollama / LangChain）"""
+
+    async def agenerate_structured(self, messages, response_model, *, num_predict=None, reasoning=None):
+        """LangChain の with_structured_output を内部で使用し、構造化出力を返す。"""
+        llm_instance = self._make_llm(num_predict=num_predict, reasoning=reasoning)
+        structured_llm = llm_instance.with_structured_output(response_model)
+        langchain_messages = self._to_langchain_messages(messages)
+        return await structured_llm.ainvoke(langchain_messages)
 ```
 
 ### 11.5 エラーハンドリング戦略（FR-01）

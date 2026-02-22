@@ -237,26 +237,22 @@ docs/
 
 #### ディレクトリ構造
 
-`tests/` は `src/` の構造をミラーリングし、テスト対象のモジュールと対応するテストファイルを配置する。
+`tests/` はテストの性質（実行速度・外部依存の有無）に基づいてディレクトリを分類する。この構成は pytest のマーカーや CI/CD パイプラインでのテスト実行制御と親和性が高い。
 
 ```
 tests/
-├── domain/
-│   └── test_models.py              # ドメインモデルのバリデーションテスト
-├── usecases/
-│   ├── test_agent_workflow.py      # ワークフロー統合テスト
-│   └── nodes/
-│       ├── test_task_planning_node.py
-│       ├── test_doc_search_node.py
-│       ├── test_summarize_node.py
-│       ├── test_judge_node.py
-│       └── test_generate_answer_node.py
-├── interfaces/
-│   └── adapters/
-│       ├── test_chromadb_adapter.py
-│       ├── test_reranker_adapter.py
-│       └── test_pdf_loader_adapter.py  # データ前処理のテスト含む
-└── conftest.py                     # 共通フィクスチャ（モック定義等）
+├── unit/                          # ユニットテスト（外部依存なし / モック使用、高速）
+│   ├── test_models.py             # Pydantic モデルのバリデーションテスト
+│   ├── test_data_preprocessing.py # データ前処理（純粋関数）のテスト
+│   ├── test_task_planning_node.py # タスク分割ノードのテスト（モック注入）
+│   ├── test_doc_search_node.py    # ドキュメント検索ノードのテスト（モック注入）
+│   ├── test_summarize_node.py     # 要約ノードのテスト（モック注入）
+│   ├── test_judge_node.py         # 判定ノードのテスト（モック注入）
+│   └── test_data_ingestion.py     # データ取り込みユースケースのテスト（モック注入）
+├── integration/                   # 統合テスト（実ライブラリ使用、低速）
+│   ├── test_ingestion_pipeline.py # データ取り込みパイプライン全体
+│   └── test_agent_workflow.py     # AgentWorkflow 全体フロー（モック注入）
+└── conftest.py                    # 共通フィクスチャ（モック定義等）
 ```
 
 #### ファイル命名規則
