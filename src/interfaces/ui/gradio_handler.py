@@ -139,7 +139,6 @@ class GradioHandler:
                 with gr.Column(scale=2):
                     chatbot = gr.Chatbot(
                         label="チャット",
-                        type="messages",
                         height=500,
                     )
 
