@@ -1,0 +1,179 @@
+"""PDF データローダーアダプタ（DataLoaderPort の実装）"""
+
+from __future__ import annotations
+
+import logging
+import re
+import uuid
+
+from domain.models import DocumentChunk
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# テキスト前処理（純粋関数）
+# ---------------------------------------------------------------------------
+
+
+def clean_pdf_text(text: str) -> str:
+    """PDF から抽出したテキストのノイズを除去する。
+
+    - 1文字行が3行以上連続するブロックを除去
+    - 3行以上の連続空行を2行に圧縮
+    """
+    # 1文字行が3行以上連続するブロックを除去
+    lines = text.split("\n")
+    cleaned_lines: list[str] = []
+    single_char_buffer: list[str] = []
+
+    for line in lines:
+        stripped = line.strip()
+        if len(stripped) == 1:
+            single_char_buffer.append(line)
+        else:
+            if len(single_char_buffer) < 3:
+                cleaned_lines.extend(single_char_buffer)
+            single_char_buffer = []
+            cleaned_lines.append(line)
+
+    # 末尾のバッファ処理
+    if len(single_char_buffer) < 3:
+        cleaned_lines.extend(single_char_buffer)
+
+    result = "\n".join(cleaned_lines)
+
+    # 3行以上の連続空行を2行に圧縮
+    result = re.sub(r"\n{3,}", "\n\n", result)
+
+    return result
+
+
+def split_into_safe_blocks(
+    text: str,
+    max_bytes: int = 40000,
+    overlap_chars: int = 100,
+) -> list[str]:
+    """spaCy のバイト制限対策でテキストを段落区切りで分割する。"""
+    if len(text.encode("utf-8")) <= max_bytes:
+        return [text]
+
+    paragraphs = text.split("\n\n")
+    blocks: list[str] = []
+    current_block: list[str] = []
+    current_bytes = 0
+
+    for para in paragraphs:
+        para_bytes = len(para.encode("utf-8"))
+
+        if current_bytes + para_bytes > max_bytes and current_block:
+            block_text = "\n\n".join(current_block)
+            blocks.append(block_text)
+
+            # オーバーラップ: 最後のブロックの末尾を次のブロックの先頭に含める
+            overlap_text = block_text[-overlap_chars:] if overlap_chars > 0 else ""
+            current_block = []
+            current_bytes = 0
+            if overlap_text:
+                current_block.append(overlap_text)
+                current_bytes = len(overlap_text.encode("utf-8"))
+
+        current_block.append(para)
+        current_bytes += para_bytes
+
+    if current_block:
+        blocks.append("\n\n".join(current_block))
+
+    return blocks
+
+
+def tokenize(text: str) -> list[str]:
+    """BM25 用の形態素解析トークナイズ。
+
+    spaCy の日本語モデルで形態素解析し、名詞・動詞・形容詞を抽出する。
+    """
+    import spacy
+
+    try:
+        nlp = spacy.load("ja_core_news_sm")
+    except OSError:
+        logger.warning(
+            "spaCy 日本語モデルが見つかりません。空白分割にフォールバックします。"
+        )
+        return text.split()
+
+    doc = nlp(text)
+    target_pos = {"NOUN", "VERB", "ADJ", "PROPN"}
+    return [token.text for token in doc if token.pos_ in target_pos]
+
+
+# ---------------------------------------------------------------------------
+# PDFLoaderAdapter
+# ---------------------------------------------------------------------------
+
+
+class PDFLoaderAdapter:
+    """markitdown + spaCy による DataLoaderPort の具体実装"""
+
+    def __init__(
+        self,
+        chunk_size: int = 500,
+        chunk_overlap: int = 100,
+        block_max_bytes: int = 40000,
+    ) -> None:
+        self._chunk_size = chunk_size
+        self._chunk_overlap = chunk_overlap
+        self._block_max_bytes = block_max_bytes
+
+    def load(self, file_path: str) -> list[DocumentChunk]:
+        """PDF からテキストを抽出しチャンク分割して返す"""
+        from pathlib import Path
+
+        from markitdown import MarkItDown
+
+        source = Path(file_path).name
+        logger.info("PDF 読み込み開始: %s", source)
+
+        md = MarkItDown()
+        result = md.convert(file_path)
+        raw_text = result.text_content
+
+        # 前処理
+        cleaned = clean_pdf_text(raw_text)
+        blocks = split_into_safe_blocks(cleaned, max_bytes=self._block_max_bytes)
+
+        # チャンク分割
+        all_chunks: list[DocumentChunk] = []
+        for block in blocks:
+            chunks = self._split_text(block, source)
+            all_chunks.extend(chunks)
+
+        logger.info("チャンク分割完了: %d チャンク", len(all_chunks))
+        return all_chunks
+
+    def _split_text(
+        self,
+        text: str,
+        source: str,
+    ) -> list[DocumentChunk]:
+        """テキストを固定サイズでチャンク分割する。"""
+        chunks: list[DocumentChunk] = []
+        start = 0
+        text_len = len(text)
+
+        while start < text_len:
+            end = min(start + self._chunk_size, text_len)
+            chunk_text = text[start:end].strip()
+
+            if chunk_text:
+                chunks.append(
+                    DocumentChunk(
+                        chunk_id=str(uuid.uuid4()),
+                        text=chunk_text,
+                        source=source,
+                    ),
+                )
+
+            start += self._chunk_size - self._chunk_overlap
+
+        return chunks
