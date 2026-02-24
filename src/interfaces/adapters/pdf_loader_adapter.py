@@ -87,19 +87,32 @@ def split_into_safe_blocks(
     return blocks
 
 
+_nlp_instance = None
+
+
+def _get_nlp():
+    """spaCy 日本語モデルを遅延ロードしてキャッシュする。"""
+    global _nlp_instance  # noqa: PLW0603
+    if _nlp_instance is None:
+        import spacy
+
+        try:
+            _nlp_instance = spacy.load("ja_ginza", disable=["parser", "ner"])
+        except OSError:
+            logger.warning(
+                "spaCy 日本語モデルが見つかりません。空白分割にフォールバックします。"
+            )
+    return _nlp_instance
+
+
 def tokenize(text: str) -> list[str]:
     """BM25 用の形態素解析トークナイズ。
 
     spaCy の日本語モデルで形態素解析し、名詞・動詞・形容詞を抽出する。
+    モデルは初回呼び出し時に1度だけロードされる。
     """
-    import spacy
-
-    try:
-        nlp = spacy.load("ja_core_news_sm")
-    except OSError:
-        logger.warning(
-            "spaCy 日本語モデルが見つかりません。空白分割にフォールバックします。"
-        )
+    nlp = _get_nlp()
+    if nlp is None:
         return text.split()
 
     doc = nlp(text)

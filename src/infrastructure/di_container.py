@@ -114,7 +114,9 @@ class DIContainer:
     def create_ui(self) -> GradioHandler:
         """GradioHandler を生成する。"""
         return GradioHandler(
-            workflow=self.create_workflow(),
             ingestion=self.create_ingestion(),
             config=self.config,
+            llm=self.create_llm(),
+            vectorstore=self.create_vectorstore(),
+            reranker=self.create_reranker(),
         )
