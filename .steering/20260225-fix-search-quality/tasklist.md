@@ -7,6 +7,7 @@
 - [x] `di_container.py`: embedding 関数を document 用 / query 用に分離
 - [x] `chromadb_adapter.py`: コンストラクタで2つの embedding 関数を受取 + `is_empty()` 追加
 - [x] `pdf_loader_adapter.py`: `_split_text()` を `SpacyTextSplitter` に変更
+- [x] `pdf_loader_adapter.py`: `SpacyTextSplitter` を `load()` で1度だけ生成し全ブロックで再利用（パフォーマンス改善）
 - [x] `pdf_loader_adapter.py`: `tokenize()` に NUM, ストップワード, 単文字フィルタ, レンマ化を追加
 - [x] `pdf_loader_adapter.py`: `load()` に NFKC 正規化を追加
 - [x] `gradio_handler.py`: 空入力チェック + PDF 未ロードガードを追加

@@ -168,10 +168,19 @@ class PDFLoaderAdapter:
         cleaned = clean_pdf_text(cleaned)
         blocks = split_into_safe_blocks(cleaned, max_bytes=self._block_max_bytes)
 
-        # チャンク分割
+        # チャンク分割（SpacyTextSplitter は1度だけ生成して再利用）
+        from langchain_text_splitters import SpacyTextSplitter
+
+        splitter = SpacyTextSplitter(
+            separator="\n\n",
+            pipeline="ja_ginza",
+            chunk_size=self._chunk_size,
+            chunk_overlap=self._chunk_overlap,
+        )
+
         all_chunks: list[DocumentChunk] = []
         for block in blocks:
-            chunks = self._split_text(block, source)
+            chunks = self._split_text(block, source, splitter)
             all_chunks.extend(chunks)
 
         logger.info("チャンク分割完了: %d チャンク", len(all_chunks))
@@ -181,16 +190,9 @@ class PDFLoaderAdapter:
         self,
         text: str,
         source: str,
+        splitter: object,
     ) -> list[DocumentChunk]:
         """SpacyTextSplitter で文境界を考慮してチャンク分割する。"""
-        from langchain_text_splitters import SpacyTextSplitter
-
-        splitter = SpacyTextSplitter(
-            separator="\n\n",
-            pipeline="ja_ginza",
-            chunk_size=self._chunk_size,
-            chunk_overlap=self._chunk_overlap,
-        )
         split_texts = splitter.split_text(text)
 
         chunks: list[DocumentChunk] = []

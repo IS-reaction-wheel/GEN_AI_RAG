@@ -54,16 +54,25 @@ Protocol のインターフェースは変更しない（embedding は内部実�
 
 `_split_text()` メソッドを `SpacyTextSplitter` ベースに書き換える。
 
-```python
-def _split_text(self, text: str, source: str) -> list[DocumentChunk]:
-    from langchain_text_splitters import SpacyTextSplitter
+**重要**: `SpacyTextSplitter` のコンストラクタは内部で `spacy.load()` を呼ぶため、
+ブロックごとに毎回生成するとパフォーマンスが大幅に劣化する。
+notebook 07 と同様に `load()` 内で1度だけ生成し、全ブロックで再利用する。
 
+```python
+def load(self, file_path: str) -> list[DocumentChunk]:
+    ...
+    # SpacyTextSplitter は1度だけ生成して再利用
     splitter = SpacyTextSplitter(
         separator="\n\n",
         pipeline="ja_ginza",
         chunk_size=self._chunk_size,
         chunk_overlap=self._chunk_overlap,
     )
+    for block in blocks:
+        chunks = self._split_text(block, source, splitter)
+        ...
+
+def _split_text(self, text, source, splitter) -> list[DocumentChunk]:
     split_texts = splitter.split_text(text)
     return [
         DocumentChunk(chunk_id=str(uuid.uuid4()), text=t.strip(), source=source)
