@@ -1,7 +1,8 @@
 .env
 .claude/
 .mcp.json
-.steering
+.pytest_cache
+.ruff_cache
 .venv/
 .vscode/
 data/

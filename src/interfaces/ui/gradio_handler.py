@@ -37,6 +37,7 @@ class GradioHandler:
         self._ingestion = ingestion
         self._config = config
         self._llm = llm
+        self._vectorstore = vectorstore
 
         # ノードファクトリからノード関数を生成
         from usecases.nodes.doc_search_node import create_doc_search_node
@@ -64,6 +65,23 @@ class GradioHandler:
         各ステップで yield して思考過程をリアルタイム表示する。
         最終回答はトークン単位でストリーミングする。
         """
+        # 空入力の防止
+        if not message.strip():
+            yield history, thinking_log, session_state
+            return
+
+        # PDF 未ロード時のガード
+        if hasattr(self._vectorstore, "is_empty") and self._vectorstore.is_empty():
+            history = list(history) + [
+                {"role": "user", "content": message},
+                {
+                    "role": "assistant",
+                    "content": "⚠️ PDFファイルを先にアップロードしてください。",
+                },
+            ]
+            yield history, thinking_log, session_state
+            return
+
         thread_id = session_state.get("thread_id", str(uuid.uuid4()))
         session_state["thread_id"] = thread_id
 

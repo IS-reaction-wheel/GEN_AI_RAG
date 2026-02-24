@@ -19,10 +19,12 @@ class ChromaDBAdapter:
     def __init__(
         self,
         embedding_fn: Callable[[list[str]], list[list[float]]],
+        query_embedding_fn: Callable[[list[str]], list[list[float]]] | None = None,
         collection_name: str = "rag_collection",
         tokenize_fn: Callable[[str], list[str]] | None = None,
     ) -> None:
         self._embedding_fn = embedding_fn
+        self._query_embedding_fn = query_embedding_fn or embedding_fn
         self._tokenize_fn = tokenize_fn
         self._client = chromadb.Client()
         self._collection = self._client.get_or_create_collection(
@@ -32,6 +34,10 @@ class ChromaDBAdapter:
         # BM25 用のドキュメントキャッシュ
         self._chunks_cache: list[DocumentChunk] = []
         self._bm25_index: Any | None = None
+
+    def is_empty(self) -> bool:
+        """ドキュメントが登録されていないかどうかを返す。"""
+        return self._collection.count() == 0 and not self._chunks_cache
 
     def add_documents(self, chunks: list[DocumentChunk]) -> None:
         """ドキュメントチャンクをベクトル DB に追加する"""
@@ -84,7 +90,7 @@ class ChromaDBAdapter:
         if self._collection.count() == 0:
             return []
 
-        query_embedding = self._embedding_fn([query])[0]
+        query_embedding = self._query_embedding_fn([query])[0]
 
         results = self._collection.query(
             query_embeddings=[query_embedding],

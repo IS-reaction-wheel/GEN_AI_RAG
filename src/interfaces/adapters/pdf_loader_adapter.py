@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
 import uuid
 
 from domain.models import DocumentChunk
@@ -108,7 +109,8 @@ def _get_nlp():
 def tokenize(text: str) -> list[str]:
     """BM25 用の形態素解析トークナイズ。
 
-    spaCy の日本語モデルで形態素解析し、名詞・動詞・形容詞を抽出する。
+    spaCy (ja_ginza) で形態素解析し、名詞・動詞・形容詞・固有名詞・数詞の
+    見出し語を抽出する。ストップワードと単文字ノイズは除外する。
     モデルは初回呼び出し時に1度だけロードされる。
     """
     nlp = _get_nlp()
@@ -116,8 +118,18 @@ def tokenize(text: str) -> list[str]:
         return text.split()
 
     doc = nlp(text)
-    target_pos = {"NOUN", "VERB", "ADJ", "PROPN"}
-    return [token.text for token in doc if token.pos_ in target_pos]
+    target_pos = {"NOUN", "VERB", "ADJ", "PROPN", "NUM"}
+    tokens: list[str] = []
+    for token in doc:
+        if token.pos_ not in target_pos:
+            continue
+        if token.is_stop:
+            continue
+        lemma = token.lemma_
+        if len(lemma) == 1 and re.match(r"[ぁ-ん\u30fc!-/:-@\[-`{-~]", lemma):
+            continue
+        tokens.append(lemma)
+    return tokens
 
 
 # ---------------------------------------------------------------------------
@@ -152,7 +164,8 @@ class PDFLoaderAdapter:
         raw_text = result.text_content
 
         # 前処理
-        cleaned = clean_pdf_text(raw_text)
+        cleaned = unicodedata.normalize("NFKC", raw_text)
+        cleaned = clean_pdf_text(cleaned)
         blocks = split_into_safe_blocks(cleaned, max_bytes=self._block_max_bytes)
 
         # チャンク分割
@@ -169,24 +182,26 @@ class PDFLoaderAdapter:
         text: str,
         source: str,
     ) -> list[DocumentChunk]:
-        """テキストを固定サイズでチャンク分割する。"""
+        """SpacyTextSplitter で文境界を考慮してチャンク分割する。"""
+        from langchain_text_splitters import SpacyTextSplitter
+
+        splitter = SpacyTextSplitter(
+            separator="\n\n",
+            pipeline="ja_ginza",
+            chunk_size=self._chunk_size,
+            chunk_overlap=self._chunk_overlap,
+        )
+        split_texts = splitter.split_text(text)
+
         chunks: list[DocumentChunk] = []
-        start = 0
-        text_len = len(text)
-
-        while start < text_len:
-            end = min(start + self._chunk_size, text_len)
-            chunk_text = text[start:end].strip()
-
-            if chunk_text:
+        for t in split_texts:
+            stripped = t.strip()
+            if stripped:
                 chunks.append(
                     DocumentChunk(
                         chunk_id=str(uuid.uuid4()),
-                        text=chunk_text,
+                        text=stripped,
                         source=source,
                     ),
                 )
-
-            start += self._chunk_size - self._chunk_overlap
-
         return chunks

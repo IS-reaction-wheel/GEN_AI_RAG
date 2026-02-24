@@ -28,18 +28,26 @@ class DIContainer:
         self._workflow: AgentWorkflow | None = None
         self._ingestion: DataIngestion | None = None
 
-    def _create_embedding_fn(self) -> callable:
-        """Sentence Transformers による Embedding 関数を生成する。"""
+    def _create_embedding_fns(self) -> tuple[callable, callable]:
+        """Sentence Transformers による Embedding 関数を生成する。
+
+        ruri-v3 はドキュメント/クエリで異なるプレフィックスを要求するため、
+        2つの関数を返す。
+        """
         from sentence_transformers import SentenceTransformer
 
         model = SentenceTransformer(self.config.embedding_model_name)
         logger.info("Embedding モデルをロード: %s", self.config.embedding_model_name)
 
-        def embedding_fn(texts: list[str]) -> list[list[float]]:
-            embeddings = model.encode(texts, convert_to_numpy=True)
-            return embeddings.tolist()
+        def embed_documents(texts: list[str]) -> list[list[float]]:
+            prefixed = [f"検索文書: {t}" for t in texts]
+            return model.encode(prefixed, convert_to_numpy=True).tolist()
 
-        return embedding_fn
+        def embed_query(texts: list[str]) -> list[list[float]]:
+            prefixed = [f"検索クエリ: {t}" for t in texts]
+            return model.encode(prefixed, convert_to_numpy=True).tolist()
+
+        return embed_documents, embed_query
 
     def create_llm(self) -> OllamaAdapter:
         """LLMPort の具体実装を生成する。"""
@@ -58,9 +66,10 @@ class DIContainer:
     def create_vectorstore(self) -> ChromaDBAdapter:
         """VectorStorePort の具体実装を生成する。"""
         if self._vectorstore is None:
-            embedding_fn = self._create_embedding_fn()
+            embed_documents, embed_query = self._create_embedding_fns()
             self._vectorstore = ChromaDBAdapter(
-                embedding_fn=embedding_fn,
+                embedding_fn=embed_documents,
+                query_embedding_fn=embed_query,
                 tokenize_fn=tokenize,
             )
             logger.info("ChromaDBAdapter を生成")
