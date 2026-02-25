@@ -4,16 +4,13 @@
 
 ```
 GEN_AI_RAG/
-├── app/                        # Gradio UI のエントリーポイント用スクリプト
 ├── data/                       # RAG で読み込むテストデータ（PDF）※GitHub 未アップロード
 ├── docs/                       # 永続的ドキュメント（設計書・仕様書）
 ├── notebook/                   # 各実装要素の確認用 Jupyter Notebook（Ollama ベース）
 │   ├── images/                 # デモ GIF・スクリーンショット等
 │   └── outputs/                # Notebook 出力（チャットログ・推論ログ等）
 ├── notebook_transformers/      # 初期の transformers ベース実装（アーカイブ）
-├── outputs/                    # ファイル出力
 ├── prompts_SDD/                # 仕様駆動開発のドキュメント作成指示プロンプト
-├── scripts/                    # 前処理・モデルチューニング等のスクリプト
 ├── src/                        # 主要な実装コード（Clean Architecture）
 ├── tests/                      # 単体テスト・統合テストコード
 ├── .steering/                  # 作業単位の一時的なステアリングファイル
@@ -28,14 +25,11 @@ GEN_AI_RAG/
 
 | ディレクトリ | 役割 |
 |---|---|
-| `app/` | Gradio UI のエントリーポイント。DIContainer で初期化し、Gradio UI を起動するスクリプトを配置 |
 | `data/` | RAG で読み込むテストデータ（PDF）を格納。機密情報を含むため GitHub には未アップロード |
 | `docs/` | アプリケーション全体の設計を定義する永続的ドキュメント群を配置（詳細はセクション 3 参照） |
 | `notebook/` | Google Colab 上で実行する Main ルーチン（`.ipynb`）を配置。`src/` のモジュールを import して使用する |
 | `notebook_transformers/` | 初期の transformers ベース実装のアーカイブ。Ollama ベースに移行後は参照用として保持 |
-| `outputs/` | スクリプトやワークフローのファイル出力先 |
 | `prompts_SDD/` | 仕様駆動開発（SDD）におけるドキュメント作成指示プロンプトを格納 |
-| `scripts/` | 前処理やモデルチューニングなど、パラメータ調整が必要なコードを配置 |
 | `src/` | Clean Architecture に基づく主要な実装コード（詳細はセクション 2 参照） |
 | `tests/` | ユニットテスト・統合テストコードを配置（詳細はセクション 4 参照） |
 | `.steering/` | 特定の開発作業における一時的なステアリングファイルを配置（詳細はセクション 3 参照） |

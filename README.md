@@ -13,8 +13,7 @@
 - Github / Google Colab のテスト使用
 
 #### 進行状況
-- notebook での実装確認が完了。今後、スクリプトへの移植を実施予定。（移植後、本リポジトリは完了）
-  > 仕様駆動開発でのスクリプト実装終了。コードレビューし、問題なければ本プロジェクトは終了予定。
+- notebook での実装確認、および仕様駆動開発（SDD）による Clean Architecture へのスクリプト移植が完了。本プロジェクトは完了。
 
 #### 環境
 - 開発環境：Windows / Python / VS Code / Claude Code
@@ -31,18 +30,16 @@
 #### フォルダ・ファイル構成
 |フォルダ・ファイル|説明|備考|
 |:---|:---|:---|
-|docs/|ドキュメント|-|ｃ
-|app/|Gradio UIのスクリプト|-|
+|docs/|永続的ドキュメント（設計書・仕様書）|-|
 |data/|RAGで読み込みするテストデータ（PDF）|githubには未アップロード|
 |notebook/|各実装要素の確認用（Ollama ベース）|-|
 |notebook_transformers/|初期の transformers ベース実装（アーカイブ）|[経緯](notebook_transformers/README.md)|
-|outputs/|ファイル出力|-|
-|src/|主要な実装コード|-|
-|scripts/|前処理や読み込みモデルなどのチューニングが必要なコード|-|
-|tests/|単体テストコード|-|
-|.env|環境変数設定|githubには未アップロード。`notebook_transformers/` でのみ使用。|
-|CLAUDE.md|Claude Code 向けの開発ルールとコマンド参照|-|
-|README.md|本リポジトリの概要|この画面のdoc|
+|prompts_SDD/|仕様駆動開発のドキュメント作成指示プロンプト|-|
+|src/|主要な実装コード（Clean Architecture）|-|
+|tests/|単体テスト・統合テストコード|-|
+|.env|環境変数設定|githubには未アップロード。`WorkflowConfig` が `RAG_` プレフィックスで読み込み|
+|CLAUDE.md|Claude Code 向けの開発ルールとプロジェクトメモリ|-|
+|README.md|本リポジトリの概要|-|
 
 #### 動作確認に使用したテストデータ
 > [井澤克彦, 市川信一郎, 高速回転ホイール: 高速回転ホイール開発を通しての知見, 宇宙航空研究開発機構研究開発報告, 2008](https://jaxa.repo.nii.ac.jp/records/2149)
