@@ -16,8 +16,8 @@
 - notebook での実装確認、および仕様駆動開発（SDD）による Clean Architecture へのスクリプト移植が完了。本プロジェクトは完了。
 
 #### 技術ブログ（Zenn）
-[Colab完結：ローカルAgentic RAG + Gradio UI](https://zenn.dev/is_rw/articles/79dc9bf5dfe6ed)
-[非ソフトウェア技術者の「AI開発の限界と落としどころ」〜仕様駆動開発でローカルAgentic RAGをスクリプト化〜](https://zenn.dev/is_rw/articles/5ff3e9487184ec)
+1. [Colab完結：ローカルAgentic RAG + Gradio UI](https://zenn.dev/is_rw/articles/79dc9bf5dfe6ed)
+2. [非ソフトウェア技術者の「AI開発の限界と落としどころ」〜仕様駆動開発でローカルAgentic RAGをスクリプト化〜](https://zenn.dev/is_rw/articles/5ff3e9487184ec)
 
 #### 環境
 - 開発環境：Windows / Python / VS Code / Claude Code
